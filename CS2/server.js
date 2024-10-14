@@ -3,6 +3,7 @@ const app = express()
 const port = 3000
 const path = require('path');
 const multer = require('multer');
+const { sendToQueue } = require('./controller/processStarter')
 
 app.get('/', (req,res) => {
   res.sendFile(__dirname + '/template/index.html');
@@ -26,9 +27,12 @@ app.post('/upload', upload.array('files', 10), (req, res) => {
   }
 
   console.info(`Uploaded file: ${JSON.stringify(req.files)}`)
+  req.files.forEach((file) => {
+    sendToQueue('ocr_queue', file.path)
+  })
 
   res.json({
-    message: 'Files uploaded successfully',
+    message: 'Processed successfully',
     files: req.files
   });
 });
