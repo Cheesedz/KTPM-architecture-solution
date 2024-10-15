@@ -1,5 +1,5 @@
 node_modules
 CS1/db/app.db
-CS2/uploads
-output.pdf
+CS2/uploads/*
+CS2/output/*
 .DS_Store
