@@ -23,3 +23,28 @@ $ npm start
 ## Yêu cầu
  - Hoàn thiện chương trình sử dụng `express.js` cho phép upload một file ảnh và trả về một file `pdf` tương ứng
  - Sử dụng `Pipes and Filters pattern` và `message queue` để hoàn thiện chương trình trên.
+
+## Cài đặt
+```sh
+# Khởi chạy rabbitmq server
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-management
+
+# Khởi chạy app server
+npm run dev
+
+# Khởi chạy các consumer
+node service/ocr_handler.js
+node service/translate_handler.js
+node service/pdf_handler.js
+```
+
+## Monitor
+```bash
+# Bật monitor plugin 
+docker exec -it rabbitmq sh
+rabbitmq-plugins enable rabbitmq_management
+
+# Truy cập vào port 15672 
+username: guest
+password: guest
+```
