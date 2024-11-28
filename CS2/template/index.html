@@ -1,13 +1,131 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>CS 2</title>
+    <style>
+      .file-item {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+
+      .file-item img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        margin-right: 10px;
+      }
+
+      .file-item span {
+        margin-right: 10px;
+      }
+
+      .status {
+        font-weight: bold;
+      }
+
+      .status.processing {
+        color: orange;
+      }
+
+      .status.done {
+        color: green;
+      }
+
+      .download-btn {
+        margin-left: 10px;
+        padding: 5px 10px;
+        background-color: green;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+
+      .download-btn:disabled {
+        background-color: gray;
+        cursor: not-allowed;
+      }
+    </style>
   </head>
   <body>
-    <form action="/upload"  enctype="multipart/form-data" method="POST">
-      Select files: <input type="file" name="files" multiple>
-      <input type="submit" value="Upload your files"/>
+    <h1>Upload your files</h1>
+    <form id="upload-form" enctype="multipart/form-data" method="POST">
+      Select files: <input type="file" id="file-input" name="files" multiple />
+      <input type="submit" value="Upload your files" />
     </form>
+
+    <h2>Upload Status</h2>
+    <ul id="file-list"></ul>
+
+    <script>
+      const form = document.getElementById("upload-form");
+      const fileInput = document.getElementById("file-input");
+      const fileList = document.getElementById("file-list");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.files) {
+          data.files.forEach((file) => {
+            const listItem = document.createElement("li");
+            listItem.classList.add("file-item");
+            listItem.dataset.filename = file.filename;
+
+            const filename = document.createElement("span");
+            filename.textContent = file.filename;
+
+            const status = document.createElement("span");
+            status.classList.add("status", "processing");
+            status.textContent = "Processing";
+
+            const downloadButton = document.createElement("button");
+            downloadButton.classList.add("download-btn");
+            downloadButton.disabled = true;
+            downloadButton.textContent = "Download PDF";
+
+            listItem.appendChild(filename);
+            listItem.appendChild(status);
+            listItem.appendChild(downloadButton);
+
+            fileList.appendChild(listItem);
+
+            pollStatus(file.filename, status, downloadButton);
+          });
+        }
+      });
+
+      async function pollStatus(filename, statusElement, downloadButton) {
+        const interval = setInterval(async () => {
+          const response = await fetch(`/status/${filename}`);
+          const data = await response.json();
+
+          if (data.status === "done") {
+            statusElement.textContent = "Done";
+            statusElement.classList.remove("processing");
+            statusElement.classList.add("done");
+            downloadButton.disabled = false;
+
+            const pdfFilename = filename.replace(/\.[^/.]+$/, "") + ".pdf";
+
+            downloadButton.onclick = () => {
+              window.location.href = data.downloadLink;
+            };
+            clearInterval(interval);
+          } else {
+            statusElement.textContent = "Processing";
+            statusElement.classList.remove("done");
+            statusElement.classList.add("processing");
+          }
+        }, 3000);
+      }
+    </script>
   </body>
 </html>

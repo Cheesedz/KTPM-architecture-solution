@@ -1,4 +1,5 @@
 node_modules
+CS2/.env
 CS1/db/app.db
 CS2/uploads/*
 CS2/output/*

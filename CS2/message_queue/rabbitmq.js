@@ -4,7 +4,7 @@ let channel = null;
 
 const connectRabbitMQ = async () => {
   try {
-    const connection = await amqp.connect('amqp://localhost');
+    const connection = await amqp.connect('amqp://guest:guest@1fc7-42-118-50-140.ngrok-free.app');
     channel = await connection.createChannel();
     console.log('RabbitMQ connected');
   } catch (error) {
