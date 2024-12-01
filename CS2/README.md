@@ -25,6 +25,10 @@ $ npm start
  - Sử dụng `Pipes and Filters pattern` và `message queue` để hoàn thiện chương trình trên.
 
 ## Cài đặt
+#### Cài đặt các gói tài nguyên
+```sh
+$ npm install
+```
 #### Khởi chạy Rabbitmq và Nginx
 ```sh
 $ docker compose up
@@ -45,7 +49,7 @@ $ pm2 start ecosystem.config.js
 
 ## Giám sát
 #### Bật monitor plugin 
-```bash
+```sh
 $ docker exec -it rabbitmq sh
 $ rabbitmq-plugins enable rabbitmq_management
 ```

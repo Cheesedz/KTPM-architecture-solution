@@ -36,7 +36,7 @@ app.post("/upload", upload.array("files", 10), (req, res) => {
     sendToQueue("ocr_queue", file.path);
   });
 
-  res.json({
+  res.json(200, {
     message: "Processed successfully",
     files: req.files,
   });
