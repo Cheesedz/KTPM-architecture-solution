@@ -32,8 +32,7 @@ WORKDIR /express-docker
 COPY --from=builder /express-docker /express-docker
 
 # Install only production dependencies
-RUN npm install --only=production
-
+RUN npm install --omit=optional
 # Expose the server port
 EXPOSE 3000
 
