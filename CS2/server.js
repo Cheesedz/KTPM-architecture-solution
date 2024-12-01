@@ -70,6 +70,10 @@ app.get('/downloads/:filename', (req, res) => {
   res.status(404).send('File not found');
 });
 
-app.listen(3000, () => {
-  console.log(`Server listening on port 3000`);
+
+const host = process.argv[2] || "localhost";
+const port = process.argv[3] || 3000;
+
+app.listen(port, host, () => {
+  console.log(`Server listening on http://${host}:${port}`);
 });

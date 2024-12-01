@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./server.js localhost 3000",
+    "start:instance1": "nodemon ./server.js localhost 3000",
+    "start:instance2": "nodemon ./server.js localhost 3001",
+    "start:instance3": "nodemon ./server.js localhost 3002",
     "start:ocr": "node service/ocr_handler.js",
     "start:translate": "node service/translate_handler.js",
     "start:pdf": "node service/pdf_handler.js",

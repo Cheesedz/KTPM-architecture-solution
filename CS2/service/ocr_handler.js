@@ -19,6 +19,7 @@ const connectAndConsume = async () => {
       try {
         const startTime = Date.now();
         const ocrText = await ocr.image2text(path);
+        console.log(`OCR processing time: ${(Date.now() - startTime)/1000}s`)
 
         // Send the result to the next queue (translate_queue)
         await channel.assertQueue(nextQueue, { durable: true });

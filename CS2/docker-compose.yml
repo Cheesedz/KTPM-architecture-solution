@@ -13,21 +13,16 @@ services:
     networks:
       - app_network
 
-  app:
-    build:
-      context: . # The directory containing your Dockerfile
-    container_name: app-container
-    depends_on:
-      - rabbitmq
-    environment:
-      RABBITMQ_HOST: rabbitmq # Reference RabbitMQ by its service name
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: guest
-      RABBITMQ_PASS: guest
+  # Nginx Service
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8090:8090"       # Expose Nginx on port 80
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro # Mount configuration files
     networks:
       - app_network
-    ports:
-      - "3000:3000" # Expose your Express app's port
 
 networks:
   app_network:
