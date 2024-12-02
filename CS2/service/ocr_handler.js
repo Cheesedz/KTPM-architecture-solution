@@ -13,20 +13,22 @@ const connectAndConsume = async () => {
     await channel.prefetch(1);
 
     channel.consume(queueName, async (msg) => {
-      const path = msg.content.toString();
-      // console.log(`Received message: ${path}`);
+      const message = msg.content.toString();
+      const data = JSON.parse(message)
 
       try {
         const startTime = Date.now();
-        const ocrText = await ocr.image2text(path);
+        const ocrText = await ocr.image2text(data.path);
         console.log(`OCR processing time: ${(Date.now() - startTime)/1000}s`)
 
         // Send the result to the next queue (translate_queue)
         await channel.assertQueue(nextQueue, { durable: true });
         const sendingData = {
           text: ocrText,
-          path: path,
+          path: data.path,
           timestamp: startTime,
+          metadata: data.metadata,
+          originalname: data.originalname
         };
         channel.sendToQueue(
           nextQueue,

@@ -3,7 +3,10 @@ const app = express();
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
+const sharp = require('sharp');
 const { sendToQueue } = require("./controller/processStarter");
+const { getCachedImage } = require("./config/redis");
+const { file } = require("pdfkit");
 
 const outputDirectory = path.join(__dirname, "output");
 
@@ -32,18 +35,46 @@ app.post("/upload", upload.array("files", 10), (req, res) => {
   }
 
   console.info(`Uploaded file: ${JSON.stringify(req.files)}`);
-  req.files.forEach((file) => {
-    sendToQueue("ocr_queue", file.path);
+  req.files.forEach(async (file) => {
+    try {
+      const metadata = await sharp(file.path).metadata();
+
+      const message = {
+        path: file.path,
+        metadata,
+        originalname: file.originalname
+      };
+
+      const cacheKey = `image:${file.originalname}:${metadata.width}:${metadata.height}`
+      console.log('cacheKey', cacheKey)
+      const rs = await getCachedImage(cacheKey)
+      if (!rs) {
+        await sendToQueue("ocr_queue", message);
+      }
+    } catch (error) {
+      console.error(`Error processing file ${file.path}:`, error);
+    }
   });
 
-  res.json(200, {
-    message: "Processed successfully",
+  res.status(200).json({
+    message: "Files processed successfully",
     files: req.files,
   });
 });
 
-app.get("/status/:filename", (req, res) => {
-  const { filename } = req.params;
+app.get("/status/:filename/:originalname", async (req, res) => {
+  const { filename, originalname } = req.params;
+  const metadata = await sharp(`uploads/${filename}`).metadata();
+
+  const cacheKey = `image:${originalname}:${metadata.width}:${metadata.height}`
+  const rs = await getCachedImage(cacheKey);
+
+  if (rs) {
+    return res.json({
+      status: "done",
+      downloadLink: `/downloads/${JSON.parse(rs).split("/")[2]}`,
+    });
+  }
   const outputFile = path.join(
     outputDirectory,
     filename.replace(path.extname(filename), ".pdf")

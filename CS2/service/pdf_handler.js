@@ -1,5 +1,6 @@
 const { createPDF } = require("../utils/pdf");
 const connectRabbitMQ = require("../config/rabbitmq");
+const { redis } = require("../config/redis");
 
 const queueName = "pdf_queue";
 
@@ -20,6 +21,9 @@ const connectAndConsume = async () => {
       const fileName = receivedData.path.split("/")[1];
       // Process the PDF creation task
       const rs = await createPDF(receivedData.text, fileName);
+      const metadata = receivedData.metadata;
+      const cacheKey = `image:${receivedData.originalname}:${metadata.width}:${metadata.height}`;
+      await redis.set(cacheKey, JSON.stringify(rs), 'EX', ttl = 3600)
       console.log(
         `Process time for ${fileName}: ${
           (Date.now() - receivedData.timestamp) / 1000
