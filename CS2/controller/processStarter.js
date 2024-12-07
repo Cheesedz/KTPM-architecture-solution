@@ -2,7 +2,7 @@ const amqp = require("amqplib");
 
 const sendToQueue = async (queueName, message) => {
   try {
-    console.log(`Sending message to queue: ${JSON.stringify(message)}`);
+    // console.log(`Sending message to queue: ${JSON.stringify(message)}`);
 
     const connection = await amqp.connect("amqp://localhost");
     const channel = await connection.createChannel();
@@ -15,7 +15,7 @@ const sendToQueue = async (queueName, message) => {
     channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)), {
       persistent: true,
     });
-    console.log(`Message sent to ${queueName}:`, message);
+    // console.log(`Message sent to ${queueName}:`, message);
 
     await channel.close();
     await connection.close();

@@ -3,10 +3,20 @@ const app = express();
 const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
-const sharp = require('sharp');
+const sharp = require("sharp");
 const { sendToQueue } = require("./controller/processStarter");
 const { getCachedImage } = require("./config/redis");
-const { file } = require("pdfkit");
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000, 
+  max: 500, 
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: "Too many requests, please try again later.",
+});
+
+app.use(limiter);
 
 const outputDirectory = path.join(__dirname, "output");
 
@@ -42,7 +52,7 @@ app.post("/upload", upload.array("files", 10), (req, res) => {
       const message = {
         path: file.path,
         metadata,
-        originalname: file.originalname
+        originalname: file.originalname,
       };
 
       const cacheKey = `image:${file.originalname}:${metadata.width}:${metadata.height}`
@@ -93,14 +103,13 @@ app.get("/status/:filename/:originalname", async (req, res) => {
   res.json({ status: "processing" });
 });
 
-app.get('/downloads/:filename', (req, res) => {
+app.get("/downloads/:filename", (req, res) => {
   const filePath = path.join(outputDirectory, req.params.filename);
   if (fs.existsSync(filePath)) {
     return res.sendFile(filePath);
   }
-  res.status(404).send('File not found');
+  res.status(404).send("File not found");
 });
-
 
 const host = process.argv[2] || "localhost";
 const port = process.argv[3] || 3000;

@@ -28,6 +28,7 @@ $ npm start
 #### Cài đặt các gói tài nguyên
 ```sh
 $ npm install
+$ pip install locust
 ```
 #### Khởi chạy Rabbitmq và Nginx
 ```sh
